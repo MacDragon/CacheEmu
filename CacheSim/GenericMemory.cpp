@@ -8,21 +8,26 @@
 
 #include "GenericMemory.hpp"
 
-GenericMemory::GenericMemory(unsigned int memorysize, int accesstime) : size(memorysize), accesstime(accesstime)
+GenericMemory::GenericMemory(unsigned int memorysize, int accesstime) : size(memorysize), accesstime(accesstime), hits(0), misses(0), hittime(0), writes(0), reads(0), accesses(0), cumulativeaccesstime(0)
 {
-    hits = 0;
-    misses = 0;
-    hittime = 0;
-//    int hittime;
-//    int size;
-    accesses = 0;
-    cumulativeaccesstime = 0;
 }
 
 int GenericMemory::GetAccesses() const
 {
     return accesses;
 }
+
+int GenericMemory::GetWrites() const
+{
+    return writes;
+}
+
+
+int GenericMemory::GetReads() const
+{
+    return reads;
+}
+
 
 float GenericMemory::GetAverageAccessTime() const
 {

@@ -17,6 +17,7 @@ int MainMemory::WriteMemory(const unsigned int address)
 {
     ++accesses;
     ++hits;
+    ++writes;
     cumulativeaccesstime += accesstime;
     return accesstime;
 }
@@ -25,6 +26,7 @@ int MainMemory::ReadMemory(const unsigned int address)
 {
     ++accesses;
     ++hits;
+    ++reads;
     cumulativeaccesstime += accesstime;
     return accesstime;
 }

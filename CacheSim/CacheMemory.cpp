@@ -13,8 +13,13 @@
 CacheMemory::CacheMemory(unsigned int memorysize, int blocksize, int associativity, int latency, enum WritePolicy writepolicy, bool writeallocate ) :
     GenericMemory(memorysize, latency),
     blocksize(blocksize),
-    setsize(pow(2,associativity-1)),
-blocks((2<<memorysize)/(2<<blocksize) / associativity,vector<CacheBlock>(pow(2,associativity-1), {0, false, false, 0,0} ) ), // latency in cycles, sizes in bits. // set size in powers of 2.
+    setsize(pow(2,associativity)), // -1
+blocks(
+       (2<<memorysize)/(2<<blocksize) / pow(2,associativity), // how many sets.
+        vector<CacheBlock>(pow(2,associativity), //-1
+//       vector<CacheBlock>(pow(2,associativity-1), // size of set
+
+{0, false, false, 0,0} ) ), // latency in cycles, sizes in bits. // set size in powers of 2.
     writepolicy(writepolicy),
     fallback(nullptr),
     writeallocate(writeallocate)
@@ -26,7 +31,6 @@ void CacheMemory::SetFallBack(shared_ptr<GenericMemory> nextlevel)
     fallback = nextlevel;
 }
 
-
 unsigned int CacheMemory::GetBlock(const unsigned int address) const
 { 
     return address >> blocksize;
@@ -35,7 +39,7 @@ unsigned int CacheMemory::GetBlock(const unsigned int address) const
 unsigned int CacheMemory::GetIndex(const unsigned int address) const
 { // shift out non relevant bits. make mask instead?
  //   return ( address << setsize << blocksize ) >> setsize >> ( blocksize * 2);
-    return ( address >> blocksize ) % blocks.size(); //blocks.size();
+    return ( address >> blocksize ) % blocks.size();
 }
 
 unsigned int CacheMemory::GetTag(const unsigned int address) const
@@ -47,26 +51,32 @@ unsigned int CacheMemory::GetTag(const unsigned int address) const
 int CacheMemory::WriteMemory(unsigned int address) //write is always a miss as main memory needs to be updated
 {
     ++accesses;
+    ++writes;
     
     unsigned int penalty = 0;
     // set access still needs to be updated too
-    unsigned int cacheset = GetIndex(address);//GetBlock(address);
+    unsigned int cacheset = GetIndex(address);
     unsigned int tag = GetTag(address);
     
     bool hit = false;
     
-//    unsigned int block = GetBlock(address);
-    
+    int i = 0;
     
     for (auto& block : blocks[cacheset])
+    {
+        ++i;
         if ( block.valid && block.tag == tag )
         {
+
             hit = true;
             ++hits;
             block.dirty = true;
             block.accessorder = accesses;
             break; // we've found our hit, no point continuing loop.
         }
+    }
+    
+    i = i;
     
 
     if ( ! hit ) // if writeback miss, or writethrough calculate miss penalty and if necessary load cache block.
@@ -99,6 +109,7 @@ int CacheMemory::WriteMemory(unsigned int address) //write is always a miss as m
 int CacheMemory::ReadMemory(unsigned int address)
 {
     ++accesses;
+    ++reads;
     
     int penalty = 0;
     bool hit = false;

@@ -20,6 +20,8 @@ public:
     virtual int ReadMemory(const unsigned int address) { return 0; };
     virtual void Reset() { };
     int GetAccesses() const;
+    int GetWrites() const;
+    int GetReads() const;
     float GetAverageAccessTime() const;
     int GetHits() const;
     int GetMisses() const;
@@ -29,6 +31,8 @@ protected:
     int size;
     int hits;
     int misses;
+    int writes;
+    int reads;
     int accesses;
     long long cumulativeaccesstime;
     int accesstime;

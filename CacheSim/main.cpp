@@ -102,9 +102,9 @@ shared_ptr<CacheMemory> SetupCache(int level) // setup a cache level, takes leve
 {
 #ifdef quickdebug
     switch ( level ){
-        case 3 : return make_shared<DirectCacheMemory>(20, 6, 20, WriteBack, false);
-        case 2 : return make_shared<AssociativeCacheMemory>(14, 6, 2, 10, LRU, WriteBack, false);
-        case 1 : return make_shared<AssociativeCacheMemory>(10, 6, 2, 2, LRU, WriteBack, false);
+        case 3 : return make_shared<DirectCacheMemory>(20, 6, 20, WriteBack, true);
+        case 2 : return make_shared<AssociativeCacheMemory>(17, 6, 3, 10, LRU, WriteBack, true);
+        case 1 : return make_shared<AssociativeCacheMemory>(15, 6, 2, 1, LRU, WriteBack, true);
         default: return nullptr;
     }
 #endif
@@ -135,6 +135,7 @@ shared_ptr<CacheMemory> SetupCache(int level) // setup a cache level, takes leve
 
     associativity = readint("Set Associativity Size ( set size ):");
     if ( associativity < 0 ) return nullptr;
+    associativity = Powerof2(associativity);
     
     latency = readint("Cache Latency ( cycles ):", false);
     if ( latency < 0 ) return nullptr;
@@ -164,16 +165,18 @@ shared_ptr<CacheMemory> SetupCache(int level) // setup a cache level, takes leve
             }
         } while ( reppol == NotSet );
            
-        return shared_ptr<AssociativeCacheMemory>(new AssociativeCacheMemory(memsize, blocksize, associativity, latency, reppol, WriteBack, false));
+        return shared_ptr<AssociativeCacheMemory>(new AssociativeCacheMemory(memsize, blocksize, associativity, latency, reppol, WriteBack, true));
     } else
-        return shared_ptr<DirectCacheMemory>(new DirectCacheMemory(memsize, blocksize, latency, WriteBack, false));
+        return shared_ptr<DirectCacheMemory>(new DirectCacheMemory(memsize, blocksize, latency, WriteBack, true));
 }
 
 
 void DisplayLevel(shared_ptr<GenericMemory> memory, int level)
 {
     cout << "Statistics for CacheLv" << level << endl;
-    cout << "No of accesses: " << memory->GetAccesses() << endl;
+    cout << "Total no of accesses: " << memory->GetAccesses() << endl;
+    cout << "  Of which writes: " << memory->GetWrites() << endl;
+    cout << "  Of which reads: " << memory->GetReads() << endl;
     cout << "No of hits: " << memory->GetHits() << endl;
     cout << "No of misses: " << memory->GetMisses() << endl;
     cout << "AMAT: " << memory->GetAverageAccessTime() << endl;
@@ -386,6 +389,8 @@ void PrintReport(deque<shared_ptr<GenericMemory> > & MemoryStruct, long cycles)
             DisplayLevel(element, i);
         else {
             cout << "No of accesses to main memory: " << element->GetHits() << endl;
+            cout << "  Of which writes: " << element->GetWrites() << endl;
+            cout << "  Of which reads: " << element->GetReads() << endl;
             cout << "AMAT of main memory: " << element->GetAverageAccessTime() << endl;
         }
         ++i;
