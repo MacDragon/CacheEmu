@@ -421,7 +421,7 @@ int main(int argc, const char * argv[]) {
         
         switch ( menuoption ) {
             case SetupMemory : SetUpMemory(MemoryStruct); break;
-            case DoTrace : cycles = ExecuteTrace(MemoryStruct.front()); break;
+            case DoTrace : cycles += ExecuteTrace(MemoryStruct.front()); break;
             case ResetStats : cycles = 0; ResetCounts(MemoryStruct); break;
             case Report : PrintReport(MemoryStruct, cycles ); break;
         }
