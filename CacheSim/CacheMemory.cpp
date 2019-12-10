@@ -53,7 +53,7 @@ int CacheMemory::WriteMemory(unsigned int address) //write is always a miss as m
     ++accesses;
     ++writes;
     
-    unsigned int penalty = 0;
+    unsigned int penalty = accesstime; // always at least accesstime penalty.
     // set access still needs to be updated too
     unsigned int cacheset = GetIndex(address);
     unsigned int tag = GetTag(address);
@@ -94,10 +94,10 @@ int CacheMemory::WriteMemory(unsigned int address) //write is always a miss as m
         switch ( writepolicy )
          {
            case WriteThrough :
-                 penalty = fallback->WriteMemory(address); // next level up needs writing to
+                 penalty += fallback->WriteMemory(address); // next level up needs writing to
                  break;
            case WriteBack :
-                 penalty += accesstime;
+           //      penalty += accesstime; already accounted for.
                  break;
          }
     
@@ -111,7 +111,7 @@ int CacheMemory::ReadMemory(unsigned int address)
     ++accesses;
     ++reads;
     
-    int penalty = 0;
+    int penalty = accesstime;  // always at least accesstime penalty.
     bool hit = false;
     
     // check for cache hit
@@ -131,12 +131,12 @@ int CacheMemory::ReadMemory(unsigned int address)
     {
         // we have a cache hit
         ++hits;
-        penalty = accesstime;
+//        penalty = accesstime; // already accounted for.
     }
     else
     {
         ++misses;
-        penalty = LoadCacheBlock(address);
+        penalty += LoadCacheBlock(address);
         // pull in new block
     }
 

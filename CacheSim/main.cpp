@@ -104,7 +104,7 @@ shared_ptr<CacheMemory> SetupCache(int level) // setup a cache level, takes leve
     switch ( level ){
         case 3 : return make_shared<DirectCacheMemory>(20, 6, 20, WriteBack, true);
         case 2 : return make_shared<AssociativeCacheMemory>(17, 6, 3, 10, LRU, WriteBack, true);
-        case 1 : return make_shared<AssociativeCacheMemory>(15, 6, 2, 1, LRU, WriteBack, true);
+        case 1 : return make_shared<AssociativeCacheMemory>(15, 6, 2, 2, LRU, WriteBack, true);
         default: return nullptr;
     }
 #endif
